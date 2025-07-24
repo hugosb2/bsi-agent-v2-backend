@@ -5,7 +5,6 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 def get_ai_response(prompt: str) -> str:
-    
     if not GEMINI_API_KEY:
         raise ValueError("A chave da API do Gemini não está configurada no servidor.")
 

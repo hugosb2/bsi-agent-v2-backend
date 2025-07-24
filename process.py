@@ -1,12 +1,9 @@
 import os
-import fitz  # PyMuPDF
+import fitz
 import json
 import unicodedata
 
 def extract_text_from_pdfs(pdf_folder_path, output_json_path):
-    """
-    Extrai texto de todos os arquivos PDF em uma pasta e salva em um arquivo JSON.
-    """
     pdf_contents = {}
     print(f"Procurando por PDFs em: {pdf_folder_path}")
 
@@ -45,9 +42,7 @@ def extract_text_from_pdfs(pdf_folder_path, output_json_path):
         print(f"Erro ao salvar o arquivo JSON: {e}")
 
 if __name__ == "__main__":
-
     script_dir = os.path.dirname(os.path.abspath(__file__))
-
     pdf_folder = os.path.join(script_dir, "pdfs")
     json_output_file = os.path.join(script_dir, "pdf_content.json")
     

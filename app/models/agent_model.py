@@ -2,16 +2,11 @@ import json
 import os
 from app.services import gemini_service
 
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 APP_DIR = os.path.dirname(SCRIPT_DIR)
-
 BACKEND_ROOT = os.path.dirname(APP_DIR)
-
 PDF_CONTENT_PATH = os.path.join(BACKEND_ROOT, "pdf_content.json")
 PERSONA_CONFIG_PATH = os.path.join(BACKEND_ROOT, "persona.json")
-
 
 def load_json_file(file_path: str) -> dict:
     try:
@@ -32,17 +27,23 @@ def get_pdf_context_string(data: dict) -> str:
 PDF_DATA = load_json_file(PDF_CONTENT_PATH)
 PERSONA_CONFIG = load_json_file(PERSONA_CONFIG_PATH)
 
-# Extrai as informações necessárias das configurações
 PDF_CONTEXT = get_pdf_context_string(PDF_DATA)
 PERSONA_PROMPT = PERSONA_CONFIG.get("persona_prompt", "")
 NO_ANSWER_RESPONSE = PERSONA_CONFIG.get("no_answer_response", "Não encontrei a informação.")
 
-def get_answer_for_question(user_question: str) -> str:
-
+def get_answer_for_question(user_question: str, history: list = None) -> str:
     if not PDF_CONTEXT:
         raise ValueError("O contexto dos PDFs não está carregado no servidor.")
     if not PERSONA_PROMPT:
         raise ValueError("A configuração da persona não foi carregada.")
+
+    conversation_history = ""
+    if history:
+        for message in history:
+            sender = message.get('sender')
+            text = message.get('text', '')
+            role = "Usuário" if sender == 'user' else "Lívia"
+            conversation_history += f"{role}: {text}\n"
 
     prompt = f"""
     {PERSONA_PROMPT}
@@ -51,7 +52,11 @@ def get_answer_for_question(user_question: str) -> str:
     {PDF_CONTEXT}
     --- FIM DO CONTEXTO ---
 
-    Com base no seu conhecimento, responda à seguinte pergunta. Se a resposta não estiver no seu conhecimento, diga exatamente: "{NO_ANSWER_RESPONSE}"
+    --- HISTÓRICO DA CONVERSA ATUAL ---
+    {conversation_history}
+    --- FIM DO HISTÓRICO ---
+
+    Com base em TODO o seu conhecimento (contexto de PDFs e histórico da conversa), responda à seguinte pergunta do usuário. Se a resposta não estiver no seu conhecimento, diga exatamente: "{NO_ANSWER_RESPONSE}"
 
     PERGUNTA DO USUÁRIO: "{user_question}"
     """
